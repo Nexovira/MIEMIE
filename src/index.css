@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: #1E1611;
+    background-color: #FBF9F5;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+}
+
+/* Custom smooth scrollbar & utility classes */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Noise / Grain effect */
+.bg-grain {
+  background-image: radial-gradient(rgba(30, 22, 17, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+

@@ -1,0 +1,6 @@
+{
+  "name": "Thrift With Miemie",
+  "description": "Premium Lagos thrift fashion storefront & curated discovery platform featuring pre-loved fashion gems, babywear, wholesale bundles, and real-time administrative product management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Products: readable by everyone, manageable by authenticated admin
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    
+    // Site content: readable by everyone, updated by authenticated admin
+    match /siteContent/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    
+    // Admin documents
+    match /admins/{adminUid} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == adminUid;
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A curated thrift fashion piece, babywear item, or wholesale bundle.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 150 },
+        "slug": { "type": "string" },
+        "category": { "type": "string", "enum": ["dresses", "denim", "tops-everyday", "babywear", "wholesale", "vintage-outerwear", "accessories"] },
+        "price": { "type": "number" },
+        "currency": { "type": "string", "enum": ["NGN", "USD"] },
+        "size": { "type": "string" },
+        "colour": { "type": "string" },
+        "condition": { "type": "string", "enum": ["Grade A+ (Like New)", "Grade A (Gently Worn)", "Vintage Pristine", "Brand Sample", "Wholesale Bale"] },
+        "description": { "type": "string" },
+        "measurements": { "type": "string" },
+        "images": { "type": "array" },
+        "coverImage": { "type": "string" },
+        "status": { "type": "string", "enum": ["available", "reserved", "sold", "hidden"] },
+        "featured": { "type": "boolean" },
+        "newArrival": { "type": "boolean" },
+        "wholesaleAvailable": { "type": "boolean" },
+        "wholesalePrice": { "type": "number" },
+        "tags": { "type": "array" },
+        "whatsappMessage": { "type": "string" },
+        "displayOrder": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "price", "status", "coverImage"]
+    },
+    "SiteContent": {
+      "title": "SiteContent",
+      "description": "Global editable website text, contact info, and policies.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "heroHeadline": { "type": "string" },
+        "heroSubtext": { "type": "string" },
+        "heroBadge": { "type": "string" },
+        "whatsappNumber": { "type": "string" },
+        "instagramHandle": { "type": "string" },
+        "businessLocation": { "type": "string" },
+        "deliveryLagos": { "type": "string" },
+        "deliveryInterstate": { "type": "string" },
+        "pickupAddress": { "type": "string" },
+        "stockpilingPolicy": { "type": "string" },
+        "paymentInstructions": { "type": "string" },
+        "returnPolicy": { "type": "string" },
+        "ownerStory": { "type": "string" },
+        "announcementText": { "type": "string" },
+        "showAnnouncement": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id"]
+    },
+    "AdminProfile": {
+      "title": "AdminProfile",
+      "description": "Administrator account profile record.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "superadmin"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Curated thrift products available for viewing and shopping."
+    },
+    "/siteContent/{docId}": {
+      "schema": "SiteContent",
+      "description": "Editable website content such as homepage copy, FAQs, and WhatsApp settings."
+    },
+    "/admins/{adminUid}": {
+      "schema": "AdminProfile",
+      "description": "Registered administrators authorized to manage products and content."
+    }
+  }
+}
