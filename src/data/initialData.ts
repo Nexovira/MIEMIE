@@ -23,8 +23,8 @@ export const initialSiteContent: SiteContent = {
   ownerStoryText: 'Thrift With Miemie started right in the heart of Egbeda, Lagos with one simple conviction: style should never be gatekept by outrageous price tags. Every single piece in our collection is handpicked at dawn from premium overseas bales, steam-sanitized, inspected stitch-by-stitch, and measured accurately. We don\'t sell random second-hand clothes — we unearth one-of-a-kind vintage treasures, high-street samples, and durable babywear that let you stand out in any room.',
   ownerImageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
   wholesaleDescription: 'Start or scale your own thrift fashion hustle in Nigeria with zero guesswork. We supply handpicked Grade A bales and 20-50 piece starter packs with guaranteed profit margins.',
-  announcementText: '🔥 NEW WEEKEND DROP JUST LANDED! Claim items fast on WhatsApp before they disappear.',
-  showAnnouncement: true,
+  announcementText: '',
+  showAnnouncement: false,
   updatedAt: new Date().toISOString()
 };
 

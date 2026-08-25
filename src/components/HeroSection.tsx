@@ -46,32 +46,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreDrops }) => {
           {/* Left Column: Bold Editorial Copy */}
           <div className="lg:col-span-7 space-y-6 md:space-y-8">
             
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#1E1611] tracking-tight leading-[1.05] uppercase">
+            <h1 className="font-display text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#1E1611] tracking-tight leading-[1.08] uppercase break-words">
               {siteContent.heroHeadline || "THE BEST FINDS ARE NEVER ON THE FRONT RACK."}
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-[#5A4E45] font-normal leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-lg md:text-xl text-[#5A4E45] font-normal leading-relaxed max-w-2xl">
               {siteContent.heroSubtext || "Discover affordable thrift fashion, babywear, and wholesale gems selected for people who want style with personality."}
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2 w-full max-w-md sm:max-w-none">
               
               <button
                 id="hero-explore-btn"
                 onClick={handleExploreClick}
-                className="bg-[#1E1611] hover:bg-[#3E2F26] text-white font-bold text-base px-7 py-4 rounded-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98] group cursor-pointer"
+                className="bg-[#1E1611] hover:bg-[#3E2F26] text-white font-bold text-sm sm:text-base px-5 sm:px-7 py-3.5 sm:py-4 rounded-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98] group cursor-pointer min-h-[48px]"
               >
-                <span>Discover the latest drop</span>
-                <ArrowDownRight className="w-5 h-5 text-[#D95A2B] group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-transform" />
+                <span>Discover latest drop</span>
+                <ArrowDownRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#D95A2B] group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-transform" />
               </button>
 
               <button
                 id="hero-whatsapp-btn"
                 onClick={() => openWhatsApp(undefined, 'Hi Miemie! I am ready to explore the latest thrift collection on WhatsApp.')}
-                className="bg-[#25D366] hover:bg-[#20bd5a] text-[#0A2E14] font-extrabold text-base px-6 py-4 rounded-full flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                className="bg-[#25D366] hover:bg-[#20bd5a] text-[#0A2E14] font-extrabold text-sm sm:text-base px-5 sm:px-6 py-3.5 sm:py-4 rounded-full flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-[0.98] cursor-pointer min-h-[48px]"
               >
-                <MessageCircle className="w-5 h-5 fill-[#0A2E14]" />
+                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-[#0A2E14]" />
                 <span>Shop on WhatsApp</span>
               </button>
 

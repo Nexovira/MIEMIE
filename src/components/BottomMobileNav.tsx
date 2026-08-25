@@ -1,13 +1,13 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
-import { ShoppingBag, Grid, MessageCircle, Package, Bookmark } from 'lucide-react';
+import { Sparkles, Layers, Package, MessageCircle } from 'lucide-react';
 
 interface BottomMobileNavProps {
-  onOpenSaved: () => void;
+  onOpenSaved?: () => void;
 }
 
-export const BottomMobileNav: React.FC<BottomMobileNavProps> = ({ onOpenSaved }) => {
-  const { savedProductIds, openWhatsApp } = useStore();
+export const BottomMobileNav: React.FC<BottomMobileNavProps> = () => {
+  const { openWhatsApp } = useStore();
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -17,60 +17,72 @@ export const BottomMobileNav: React.FC<BottomMobileNavProps> = ({ onOpenSaved })
   };
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1E1611]/95 backdrop-blur-md border-t border-[#3E2F26] px-3 py-2 text-[#FBF9F5]">
-      <div className="flex items-center justify-around">
+    <nav 
+      aria-label="Mobile Navigation"
+      className="md:hidden fixed left-0 right-0 bottom-0 z-40 w-full max-w-[100vw] bg-[#1E1611]/98 backdrop-blur-md border-t border-[#3E2F26] text-[#FBF9F5] shadow-lg"
+      style={{
+        boxSizing: 'border-box',
+        paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+        paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
+        paddingTop: '6px',
+        paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))'
+      }}
+    >
+      <div className="flex items-center justify-between w-full">
         
-        {/* Drops / Catalog */}
+        {/* 1. Explore */}
         <button
           onClick={() => scrollTo('product-catalog')}
-          className="flex flex-col items-center gap-0.5 text-stone-300 hover:text-white p-1"
+          className="flex-1 min-w-0 max-w-[25%] flex flex-col items-center justify-center gap-0.5 text-stone-300 hover:text-white active:text-[#D95A2B] py-1 px-0.5 min-h-[44px] transition-colors cursor-pointer"
+          type="button"
         >
-          <Grid className="w-5 h-5 text-[#D95A2B]" />
-          <span className="text-[10px] font-bold">Drops</span>
+          <Sparkles className="w-5 h-5 text-[#D95A2B] shrink-0" />
+          <span className="text-[10px] xs:text-[11px] font-bold tracking-tight truncate w-full text-center">
+            Explore
+          </span>
         </button>
 
-        {/* Categories */}
+        {/* 2. Categories */}
         <button
           onClick={() => scrollTo('category-discovery')}
-          className="flex flex-col items-center gap-0.5 text-stone-300 hover:text-white p-1"
+          className="flex-1 min-w-0 max-w-[25%] flex flex-col items-center justify-center gap-0.5 text-stone-300 hover:text-white active:text-[#D95A2B] py-1 px-0.5 min-h-[44px] transition-colors cursor-pointer"
+          type="button"
         >
-          <ShoppingBag className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Categories</span>
+          <Layers className="w-5 h-5 text-stone-300 shrink-0" />
+          <span className="text-[10px] xs:text-[11px] font-medium tracking-tight truncate w-full text-center">
+            Categories
+          </span>
         </button>
 
-        {/* Center Giant WhatsApp Claim */}
-        <button
-          onClick={() => openWhatsApp(undefined, 'Hi Miemie! I am browsing the website and would like to claim an item.')}
-          className="relative -top-3 w-12 h-12 rounded-full bg-[#25D366] text-[#0A2E14] flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-          aria-label="WhatsApp Miemie"
-        >
-          <MessageCircle className="w-6 h-6 fill-current" />
-        </button>
-
-        {/* Wholesale */}
+        {/* 3. Wholesale */}
         <button
           onClick={() => scrollTo('wholesale-section')}
-          className="flex flex-col items-center gap-0.5 text-stone-300 hover:text-white p-1"
+          className="flex-1 min-w-0 max-w-[25%] flex flex-col items-center justify-center gap-0.5 text-stone-300 hover:text-white active:text-[#D95A2B] py-1 px-0.5 min-h-[44px] transition-colors cursor-pointer"
+          type="button"
         >
-          <Package className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Wholesale</span>
+          <Package className="w-5 h-5 text-[#D95A2B] shrink-0" />
+          <span className="text-[10px] xs:text-[11px] font-medium tracking-tight truncate w-full text-center">
+            Wholesale
+          </span>
         </button>
 
-        {/* Saved Items / Bag */}
+        {/* 4. WhatsApp */}
         <button
-          onClick={onOpenSaved}
-          className="relative flex flex-col items-center gap-0.5 text-stone-300 hover:text-white p-1"
+          onClick={() => openWhatsApp(undefined, 'Hi Miemie! I am browsing the website and would like to claim an item.')}
+          className="flex-1 min-w-0 max-w-[25%] flex flex-col items-center justify-center gap-0.5 text-[#25D366] hover:text-[#42f584] py-1 px-0.5 min-h-[44px] transition-colors cursor-pointer"
+          aria-label="WhatsApp Miemie"
+          type="button"
         >
-          <Bookmark className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Saved</span>
-          {savedProductIds && savedProductIds.length > 0 && (
-            <span className="absolute -top-1 right-1 w-4 h-4 rounded-full bg-[#D95A2B] text-white text-[9px] font-bold flex items-center justify-center">
-              {savedProductIds.length}
-            </span>
-          )}
+          <div className="w-6 h-6 rounded-full bg-[#25D366]/20 flex items-center justify-center shrink-0">
+            <MessageCircle className="w-4 h-4 fill-current text-[#25D366]" />
+          </div>
+          <span className="text-[10px] xs:text-[11px] font-bold tracking-tight truncate w-full text-center text-[#25D366]">
+            WhatsApp
+          </span>
         </button>
 
       </div>
-    </div>
+    </nav>
   );
 };
+

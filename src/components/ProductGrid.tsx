@@ -127,7 +127,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ onQuickView }) => {
           <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
             
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[240px]">
+            <div className="relative flex-1 min-w-0 w-full">
               <Search className="w-4 h-4 text-[#7A6E65] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -139,7 +139,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ onQuickView }) => {
               {filter.searchQuery && (
                 <button 
                   onClick={() => setFilter(prev => ({ ...prev, searchQuery: '' }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A6E65] hover:text-[#1E1611]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A6E65] hover:text-[#1E1611] p-1"
+                  aria-label="Clear search"
+                  type="button"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -147,17 +149,18 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ onQuickView }) => {
             </div>
 
             {/* Quick Availability Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 w-full lg:w-auto shrink-0">
               <span className="text-xs font-semibold text-[#7A6E65] mr-1 hidden sm:inline">Status:</span>
               {(['all', 'available', 'reserved', 'sold'] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setFilter(prev => ({ ...prev, status }))}
-                  className={`text-xs font-bold px-3 py-2 rounded-xl transition-all capitalize whitespace-nowrap cursor-pointer ${
+                  className={`text-xs font-bold px-3 py-2 rounded-xl transition-all capitalize whitespace-nowrap cursor-pointer shrink-0 min-h-[38px] ${
                     filter.status === status
                       ? 'bg-[#1E1611] text-white shadow-xs'
                       : 'bg-[#FBF9F5] text-[#5A4E45] hover:bg-[#EAE5DC] border border-[#DCD5C9]'
                   }`}
+                  type="button"
                 >
                   {status === 'all' ? 'All Pieces' : status}
                 </button>
@@ -165,12 +168,12 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ onQuickView }) => {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <span className="text-xs font-semibold text-[#7A6E65] whitespace-nowrap hidden sm:inline">Sort:</span>
               <select
                 value={filter.sortBy}
                 onChange={(e) => setFilter(prev => ({ ...prev, sortBy: e.target.value as any }))}
-                className="bg-[#FBF9F5] text-xs font-semibold text-[#1E1611] px-3.5 py-2.5 rounded-xl border border-[#DCD5C9] focus:outline-hidden focus:border-[#D95A2B] cursor-pointer"
+                className="w-full lg:w-auto bg-[#FBF9F5] text-xs font-semibold text-[#1E1611] px-3.5 py-2.5 rounded-xl border border-[#DCD5C9] focus:outline-hidden focus:border-[#D95A2B] cursor-pointer min-h-[38px]"
               >
                 <option value="newest">Latest Unpacked</option>
                 <option value="price-asc">Price: Low to High</option>

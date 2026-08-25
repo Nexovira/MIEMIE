@@ -27,21 +27,34 @@ import { AdminDashboard } from './components/admin/AdminDashboard';
 
 const MainAppContent: React.FC = () => {
   const { currentUser } = useAuth();
+  const { 
+    quickViewProduct, 
+    setQuickViewProduct, 
+    isSavedDrawerOpen, 
+    setIsSavedDrawerOpen,
+    products 
+  } = useStore();
+  
   const [view, setView] = useState<'store' | 'admin'>('store');
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
-  const [savedDrawerOpen, setSavedDrawerOpen] = useState(false);
 
-  // Check URL hash for direct #admin navigation
+  // Check URL hash for direct #admin navigation or shared #product-{id} links
   useEffect(() => {
     const handleHash = () => {
-      if (window.location.hash === '#admin') {
+      const hash = window.location.hash;
+      if (hash === '#admin') {
         setView('admin');
+      } else if (hash.startsWith('#product-')) {
+        const prodId = hash.replace('#product-', '');
+        const target = products.find(p => p.id === prodId);
+        if (target) {
+          setQuickViewProduct(target);
+        }
       }
     };
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+  }, [products, setQuickViewProduct]);
 
   const handleOpenAdmin = () => {
     setView('admin');
@@ -69,17 +82,14 @@ const MainAppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FBF9F5] text-[#1E1611] flex flex-col font-sans selection:bg-[#FFEFEA] selection:text-[#D95A2B]">
       
-      {/* Announcement Bar */}
-      <AnnouncementBar />
-
       {/* Primary Sticky Editorial Navbar */}
       <Navbar
-        onOpenSaved={() => setSavedDrawerOpen(true)}
+        onOpenSaved={() => setIsSavedDrawerOpen(true)}
         onOpenAdmin={handleOpenAdmin}
       />
 
-      {/* Main Storefront Body */}
-      <main className="flex-1">
+      {/* Main Storefront Body with safe bottom padding for fixed mobile nav */}
+      <main className="flex-1 w-full max-w-full overflow-x-hidden pb-[calc(88px+env(safe-area-inset-bottom,0px))] md:pb-0">
         
         {/* Editorial Hero */}
         <HeroSection onExploreDrops={() => {
@@ -120,19 +130,24 @@ const MainAppContent: React.FC = () => {
       <Footer onOpenAdmin={handleOpenAdmin} />
 
       {/* Mobile Bottom Sticky Navigation */}
-      <BottomMobileNav onOpenSaved={() => setSavedDrawerOpen(true)} />
+      <BottomMobileNav onOpenSaved={() => setIsSavedDrawerOpen(true)} />
 
       {/* Interactive Modals and Drawers */}
       {quickViewProduct && (
         <ProductQuickViewModal
           product={quickViewProduct}
-          onClose={() => setQuickViewProduct(null)}
+          onClose={() => {
+            setQuickViewProduct(null);
+            if (window.location.hash.startsWith('#product-')) {
+              window.history.replaceState(null, '', window.location.pathname);
+            }
+          }}
         />
       )}
 
       <SavedItemsDrawer
-        isOpen={savedDrawerOpen}
-        onClose={() => setSavedDrawerOpen(false)}
+        isOpen={isSavedDrawerOpen}
+        onClose={() => setIsSavedDrawerOpen(false)}
         onQuickView={(prod) => setQuickViewProduct(prod)}
       />
 
