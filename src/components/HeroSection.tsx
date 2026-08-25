@@ -2,10 +2,18 @@ import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { ArrowDownRight, MessageCircle, Sparkles, ShieldCheck, MapPin, Tag } from 'lucide-react';
 
-export const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  onExploreDrops?: () => void;
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreDrops }) => {
   const { siteContent, openWhatsApp } = useStore();
 
   const handleExploreClick = () => {
+    if (onExploreDrops) {
+      onExploreDrops();
+      return;
+    }
     const el = document.getElementById('product-catalog');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });

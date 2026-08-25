@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, SiteContent, FilterState } from '../types';
+import { Product, SiteContent, FilterState, AdminUser } from '../types';
 import { initialProducts, initialSiteContent } from '../data/initialData';
 import { 
   db, 
+  auth,
   collection, 
   doc, 
   getDocs, 
@@ -13,9 +14,46 @@ import {
   onSnapshot 
 } from '../lib/firebase';
 
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+    },
+    operationType,
+    path
+  };
+  console.warn('Firestore Operation Notice: ', JSON.stringify(errInfo));
+}
+
 interface StoreContextType {
   products: Product[];
   siteContent: SiteContent;
+  admins: AdminUser[];
   loading: boolean;
   isFirestoreLive: boolean;
   savedProductIds: string[];
@@ -32,6 +70,8 @@ interface StoreContextType {
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   updateSiteContent: (updates: Partial<SiteContent>) => Promise<void>;
+  addAdminUser: (adminData: Omit<AdminUser, 'createdAt'>) => Promise<void>;
+  deleteAdminUser: (uid: string) => Promise<void>;
   seedFirestoreData: () => Promise<void>;
   openWhatsApp: (product?: Product, customMessage?: string) => void;
 }
@@ -46,11 +86,23 @@ const defaultFilter: FilterState = {
   onlyWholesale: false,
 };
 
+const initialAdmins: AdminUser[] = [
+  {
+    uid: 'owner-miemie',
+    email: 'owner@thriftwithmiemie.com',
+    role: 'superadmin',
+    displayName: 'Miemie (Founder)',
+    createdAt: new Date().toISOString(),
+    notes: 'Primary Store Administrator'
+  }
+];
+
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [siteContent, setSiteContent] = useState<SiteContent>(initialSiteContent);
+  const [admins, setAdmins] = useState<AdminUser[]>(initialAdmins);
   const [loading, setLoading] = useState<boolean>(true);
   const [isFirestoreLive, setIsFirestoreLive] = useState<boolean>(false);
   const [filter, setFilter] = useState<FilterState>(defaultFilter);
@@ -85,12 +137,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const resetFilters = () => setFilter(defaultFilter);
 
-  // Sync Products & Site Content from Firestore with real-time listener
+  // Sync Products, Site Content & Admin accounts from Firestore with real-time onSnapshot listeners
   useEffect(() => {
     let unsubscribeProducts = () => {};
     let unsubscribeContent = () => {};
+    let unsubscribeAdmins = () => {};
 
     try {
+      // 1. Live Products Listener
       const productsRef = collection(db, 'products');
       unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
         if (!snapshot.empty) {
@@ -98,27 +152,45 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           snapshot.forEach((docSnap) => {
             fetchedProducts.push({ id: docSnap.id, ...docSnap.data() } as Product);
           });
-          // Sort by displayOrder or newest
           fetchedProducts.sort((a, b) => (a.displayOrder || 99) - (b.displayOrder || 99));
           setProducts(fetchedProducts);
           setIsFirestoreLive(true);
         } else {
-          // If Firestore is empty, we keep local initial products and flag
           setIsFirestoreLive(false);
         }
         setLoading(false);
       }, (error) => {
-        console.warn('Firestore products listener fallback to initial catalog:', error);
+        handleFirestoreError(error, OperationType.LIST, 'products');
         setLoading(false);
       });
 
+      // 2. Live Site Content Listener (Owner Photo, Bio, Policies, Announcements)
       const contentDocRef = doc(db, 'siteContent', 'homepage');
       unsubscribeContent = onSnapshot(contentDocRef, (docSnap) => {
         if (docSnap.exists()) {
-          setSiteContent({ id: docSnap.id, ...docSnap.data() } as SiteContent);
+          const data = docSnap.data();
+          setSiteContent(prev => ({
+            ...prev,
+            ...data,
+            id: docSnap.id
+          } as SiteContent));
         }
       }, (err) => {
-        console.warn('Firestore content listener error:', err);
+        handleFirestoreError(err, OperationType.GET, 'siteContent/homepage');
+      });
+
+      // 3. Live Admins Listener
+      const adminsRef = collection(db, 'admins');
+      unsubscribeAdmins = onSnapshot(adminsRef, (snapshot) => {
+        if (!snapshot.empty) {
+          const fetchedAdmins: AdminUser[] = [];
+          snapshot.forEach((docSnap) => {
+            fetchedAdmins.push({ uid: docSnap.id, ...docSnap.data() } as AdminUser);
+          });
+          setAdmins(fetchedAdmins);
+        }
+      }, (err) => {
+        handleFirestoreError(err, OperationType.LIST, 'admins');
       });
     } catch (err) {
       console.warn('Firebase init listener error:', err);
@@ -128,6 +200,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => {
       unsubscribeProducts();
       unsubscribeContent();
+      unsubscribeAdmins();
     };
   }, []);
 
@@ -150,7 +223,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  // Add Product
+  // Add Product with Live Sync
   const addProduct = async (prodData: Omit<Product, 'id' | 'createdAt'>): Promise<string> => {
     const newId = `twm-${Date.now()}`;
     const newProduct: Product = {
@@ -164,15 +237,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       await setDoc(doc(db, 'products', newId), newProduct);
       setIsFirestoreLive(true);
     } catch (err) {
-      console.warn('Writing to local state due to Firestore permissions:', err);
+      handleFirestoreError(err, OperationType.WRITE, `products/${newId}`);
     }
     
-    // Update local state optimistically
     setProducts(prev => [newProduct, ...prev]);
     return newId;
   };
 
-  // Update Product
+  // Update Product with Live Sync
   const updateProduct = async (id: string, updates: Partial<Product>): Promise<void> => {
     const updatedAt = new Date().toISOString();
     const cleanUpdates = { ...updates, updatedAt };
@@ -180,7 +252,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       await updateDoc(doc(db, 'products', id), cleanUpdates);
     } catch (err) {
-      console.warn('Firestore update failed, applying locally:', err);
+      handleFirestoreError(err, OperationType.UPDATE, `products/${id}`);
     }
 
     setProducts(prev => prev.map(p => (p.id === id ? { ...p, ...cleanUpdates } : p)));
@@ -189,12 +261,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Delete Product
+  // Delete Product with Live Sync
   const deleteProduct = async (id: string): Promise<void> => {
     try {
       await deleteDoc(doc(db, 'products', id));
     } catch (err) {
-      console.warn('Firestore delete failed, removing locally:', err);
+      handleFirestoreError(err, OperationType.DELETE, `products/${id}`);
     }
 
     setProducts(prev => prev.filter(p => p.id !== id));
@@ -203,7 +275,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Update Site Content
+  // Update Site Content (Owner Photo, Bio, Rates, Announcements) with Real Live Sync
   const updateSiteContent = async (updates: Partial<SiteContent>): Promise<void> => {
     const updated: SiteContent = {
       ...siteContent,
@@ -214,27 +286,60 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       await setDoc(doc(db, 'siteContent', 'homepage'), updated);
     } catch (err) {
-      console.warn('Firestore content update failed, saving locally:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'siteContent/homepage');
     }
 
     setSiteContent(updated);
+  };
+
+  // Add New Admin User with Live Sync
+  const addAdminUser = async (adminData: Omit<AdminUser, 'createdAt'>): Promise<void> => {
+    const newAdmin: AdminUser = {
+      ...adminData,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      await setDoc(doc(db, 'admins', adminData.uid), newAdmin);
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `admins/${adminData.uid}`);
+    }
+
+    setAdmins(prev => {
+      const exists = prev.some(a => a.uid === adminData.uid || a.email.toLowerCase() === adminData.email.toLowerCase());
+      if (exists) {
+        return prev.map(a => a.uid === adminData.uid ? newAdmin : a);
+      }
+      return [...prev, newAdmin];
+    });
+  };
+
+  // Delete Admin User
+  const deleteAdminUser = async (uid: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'admins', uid));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, `admins/${uid}`);
+    }
+
+    setAdmins(prev => prev.filter(a => a.uid !== uid));
   };
 
   // Seed initial high quality data into Firestore
   const seedFirestoreData = async (): Promise<void> => {
     try {
       setLoading(true);
-      // Seed products
       for (const prod of initialProducts) {
         await setDoc(doc(db, 'products', prod.id), prod);
       }
-      // Seed site content
       await setDoc(doc(db, 'siteContent', 'homepage'), initialSiteContent);
+      await setDoc(doc(db, 'admins', 'owner-miemie'), initialAdmins[0]);
       setIsFirestoreLive(true);
       setProducts(initialProducts);
       setSiteContent(initialSiteContent);
+      setAdmins(initialAdmins);
     } catch (err) {
-      console.error('Error seeding data:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'seed');
     } finally {
       setLoading(false);
     }
@@ -244,6 +349,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <StoreContext.Provider value={{
       products,
       siteContent,
+      admins,
       loading,
       isFirestoreLive,
       savedProductIds,
@@ -260,6 +366,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updateProduct,
       deleteProduct,
       updateSiteContent,
+      addAdminUser,
+      deleteAdminUser,
       seedFirestoreData,
       openWhatsApp
     }}>

@@ -7,7 +7,7 @@ interface BottomMobileNavProps {
 }
 
 export const BottomMobileNav: React.FC<BottomMobileNavProps> = ({ onOpenSaved }) => {
-  const { savedItems, openWhatsApp } = useStore();
+  const { savedProductIds, openWhatsApp } = useStore();
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -63,9 +63,9 @@ export const BottomMobileNav: React.FC<BottomMobileNavProps> = ({ onOpenSaved })
         >
           <Bookmark className="w-5 h-5" />
           <span className="text-[10px] font-medium">Saved</span>
-          {savedItems.length > 0 && (
+          {savedProductIds && savedProductIds.length > 0 && (
             <span className="absolute -top-1 right-1 w-4 h-4 rounded-full bg-[#D95A2B] text-white text-[9px] font-bold flex items-center justify-center">
-              {savedItems.length}
+              {savedProductIds.length}
             </span>
           )}
         </button>

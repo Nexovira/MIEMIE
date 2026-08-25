@@ -16,12 +16,21 @@ import {
 
 interface ProductCardProps {
   product: Product;
+  onQuickView?: (p: Product) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onQuickView }) => {
   const { toggleSaveProduct, isSaved, setQuickViewProduct, openWhatsApp } = useStore();
   const [isHovered, setIsHovered] = useState(false);
   const saved = isSaved(product.id);
+
+  const handleOpenQuickView = () => {
+    if (onQuickView) {
+      onQuickView(product);
+    } else {
+      setQuickViewProduct(product);
+    }
+  };
 
   // Status color badges
   const getStatusBadge = () => {
@@ -52,7 +61,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-  const imageSrc = isHovered && product.images?.length > 1 ? product.images[1] : product.coverImage;
+  const imageSrc = isHovered && product.images && product.images.length > 1 
+    ? product.images[1] 
+    : (product.coverImage || (product.images && product.images[0]) || '');
 
   return (
     <div 
@@ -108,7 +119,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Quick View Button on Hover (Desktop) / Always Tap on Mobile */}
         <button
-          onClick={() => setQuickViewProduct(product)}
+          onClick={handleOpenQuickView}
           className="absolute inset-x-3 bottom-3 bg-[#1E1611]/90 hover:bg-[#1E1611] text-white text-xs font-bold py-2.5 px-4 rounded-xl backdrop-blur-xs flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md cursor-pointer z-10"
         >
           <Eye className="w-3.5 h-3.5" />
@@ -130,7 +141,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Title */}
           <h3 
-            onClick={() => setQuickViewProduct(product)}
+            onClick={handleOpenQuickView}
             className="font-display text-sm sm:text-base font-bold text-[#1E1611] leading-snug line-clamp-2 hover:text-[#D95A2B] transition-colors cursor-pointer"
           >
             {product.name}

@@ -6,6 +6,8 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
   User 
 } from 'firebase/auth';
 import { 
@@ -46,6 +48,8 @@ export async function testFirebaseConnection(): Promise<boolean> {
 export {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,

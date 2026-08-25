@@ -14,23 +14,44 @@ import {
   PackageCheck
 } from 'lucide-react';
 
-export const ProductQuickViewModal: React.FC = () => {
-  const { quickViewProduct, setQuickViewProduct, toggleSaveProduct, isSaved, openWhatsApp } = useStore();
+import { Product } from '../types';
+
+interface ProductQuickViewModalProps {
+  product?: Product | null;
+  onClose?: () => void;
+}
+
+export const ProductQuickViewModal: React.FC<ProductQuickViewModalProps> = ({ 
+  product: propProduct, 
+  onClose: propOnClose 
+}) => {
+  const { quickViewProduct: storeProduct, setQuickViewProduct, toggleSaveProduct, isSaved, openWhatsApp } = useStore();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  if (!quickViewProduct) return null;
+  const activeProduct = propProduct !== undefined ? propProduct : storeProduct;
 
-  const images = quickViewProduct.images?.length > 0 
-    ? quickViewProduct.images 
-    : [quickViewProduct.coverImage];
+  if (!activeProduct) return null;
 
-  const saved = isSaved(quickViewProduct.id);
+  const handleClose = () => {
+    if (propOnClose) {
+      propOnClose();
+    }
+    setQuickViewProduct(null);
+  };
+
+  const images = (Array.isArray(activeProduct.images) && activeProduct.images.length > 0)
+    ? activeProduct.images 
+    : (activeProduct.coverImage ? [activeProduct.coverImage] : []);
+
+  const saved = isSaved(activeProduct.id);
 
   const handleNextImage = () => {
+    if (images.length === 0) return;
     setActiveImageIndex((prev) => (prev + 1) % images.length);
   };
 
   const handlePrevImage = () => {
+    if (images.length === 0) return;
     setActiveImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
@@ -42,7 +63,7 @@ export const ProductQuickViewModal: React.FC = () => {
         
         {/* Close Button */}
         <button
-          onClick={() => setQuickViewProduct(null)}
+          onClick={handleClose}
           className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white/90 text-[#1E1611] hover:bg-[#1E1611] hover:text-white transition-all shadow-md cursor-pointer"
           aria-label="Close modal"
         >
@@ -55,8 +76,8 @@ export const ProductQuickViewModal: React.FC = () => {
           {/* Main Stage Image */}
           <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden shadow-inner bg-stone-200">
             <img
-              src={images[activeImageIndex] || quickViewProduct.coverImage}
-              alt={quickViewProduct.name}
+              src={images[activeImageIndex] || activeProduct.coverImage}
+              alt={activeProduct.name}
               className="w-full h-full object-cover"
             />
 
@@ -83,10 +104,10 @@ export const ProductQuickViewModal: React.FC = () => {
             {/* Status Overlay */}
             <div className="absolute top-3 left-3">
               <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full text-white shadow-xs ${
-                quickViewProduct.status === 'available' ? 'bg-[#0F823B]' :
-                quickViewProduct.status === 'reserved' ? 'bg-[#D97706]' : 'bg-stone-700'
+                activeProduct.status === 'available' ? 'bg-[#0F823B]' :
+                activeProduct.status === 'reserved' ? 'bg-[#D97706]' : 'bg-stone-700'
               }`}>
-                {quickViewProduct.status === 'available' ? '● Available to claim' : quickViewProduct.status}
+                {activeProduct.status === 'available' ? '● Available to claim' : activeProduct.status}
               </span>
             </div>
           </div>
@@ -118,26 +139,26 @@ export const ProductQuickViewModal: React.FC = () => {
             {/* Category & Tags */}
             <div className="flex items-center justify-between text-xs text-[#7A6E65]">
               <span className="uppercase font-bold tracking-widest text-[#D95A2B]">
-                {quickViewProduct.category.replace('-', ' ')}
+                {activeProduct.category ? activeProduct.category.replace('-', ' ') : 'Thrift Piece'}
               </span>
               <span className="bg-[#EFECE4] text-[#1E1611] font-semibold px-2.5 py-1 rounded-md">
-                Ref: {quickViewProduct.id}
+                Ref: {activeProduct.id}
               </span>
             </div>
 
             {/* Product Title */}
             <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#1E1611] leading-tight">
-              {quickViewProduct.name}
+              {activeProduct.name}
             </h2>
 
             {/* Price Box */}
             <div className="flex items-baseline gap-3 bg-[#F4EFE6] p-3.5 rounded-2xl border border-[#E7E2D8]">
               <span className="font-display text-2xl sm:text-3xl font-black text-[#1E1611]">
-                ₦{quickViewProduct.price.toLocaleString()}
+                ₦{activeProduct.price ? activeProduct.price.toLocaleString() : '0'}
               </span>
-              {quickViewProduct.originalPrice && (
+              {activeProduct.originalPrice && (
                 <span className="text-sm text-[#9E948B] line-through">
-                  ₦{quickViewProduct.originalPrice.toLocaleString()}
+                  ₦{activeProduct.originalPrice.toLocaleString()}
                 </span>
               )}
               <span className="text-xs font-semibold text-[#0F823B] bg-[#E8F8EE] px-2 py-0.5 rounded-sm ml-auto">
@@ -149,41 +170,41 @@ export const ProductQuickViewModal: React.FC = () => {
             <div className="grid grid-cols-2 gap-2.5 text-xs">
               <div className="p-2.5 bg-white rounded-xl border border-[#E7E2D8]">
                 <span className="text-[#7A6E65] block font-medium">Tag Size</span>
-                <strong className="text-[#1E1611] text-sm">{quickViewProduct.size}</strong>
+                <strong className="text-[#1E1611] text-sm">{activeProduct.size}</strong>
               </div>
               <div className="p-2.5 bg-white rounded-xl border border-[#E7E2D8]">
                 <span className="text-[#7A6E65] block font-medium">Color Tone</span>
-                <strong className="text-[#1E1611] text-sm">{quickViewProduct.colour || 'Vintage Tone'}</strong>
+                <strong className="text-[#1E1611] text-sm">{activeProduct.colour || 'Vintage Tone'}</strong>
               </div>
               <div className="p-2.5 bg-white rounded-xl border border-[#E7E2D8] col-span-2">
                 <span className="text-[#7A6E65] block font-medium">Condition Rating</span>
                 <strong className="text-[#D95A2B] text-xs font-bold flex items-center gap-1 mt-0.5">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  {quickViewProduct.condition} · Sanitized & Inspected
+                  {activeProduct.condition} · Sanitized & Inspected
                 </strong>
               </div>
             </div>
 
             {/* Measurements */}
-            {quickViewProduct.measurements && (
+            {activeProduct.measurements && (
               <div className="p-3 bg-[#FFEFEA] rounded-xl border border-[#FCD5C8] text-xs space-y-1">
                 <div className="flex items-center gap-1 text-[#D95A2B] font-bold">
                   <Ruler className="w-3.5 h-3.5" />
                   <span>Exact Measurements:</span>
                 </div>
-                <p className="text-[#5A4E45] font-medium">{quickViewProduct.measurements}</p>
+                <p className="text-[#5A4E45] font-medium">{activeProduct.measurements}</p>
               </div>
             )}
 
             {/* Description */}
             <div className="space-y-1 text-xs sm:text-sm text-[#5A4E45] leading-relaxed">
-              <p>{quickViewProduct.description}</p>
+              <p>{activeProduct.description}</p>
             </div>
 
             {/* Tags */}
-            {quickViewProduct.tags?.length > 0 && (
+            {Array.isArray(activeProduct.tags) && activeProduct.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {quickViewProduct.tags.map((t, idx) => (
+                {activeProduct.tags.map((t, idx) => (
                   <span key={idx} className="bg-[#EFECE4] text-[#5A4E45] text-[11px] font-medium px-2.5 py-0.5 rounded-md">
                     #{t}
                   </span>
@@ -200,8 +221,8 @@ export const ProductQuickViewModal: React.FC = () => {
               {/* WhatsApp Claim */}
               <button
                 onClick={() => {
-                  openWhatsApp(quickViewProduct);
-                  setQuickViewProduct(null);
+                  openWhatsApp(activeProduct);
+                  handleClose();
                 }}
                 className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-[#0A2E14] font-black text-sm py-3.5 px-5 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-98 transition-all cursor-pointer"
               >
@@ -211,7 +232,7 @@ export const ProductQuickViewModal: React.FC = () => {
 
               {/* Wishlist toggle */}
               <button
-                onClick={() => toggleSaveProduct(quickViewProduct.id)}
+                onClick={() => toggleSaveProduct(activeProduct.id)}
                 className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
                   saved 
                     ? 'bg-[#FFEFEA] border-[#D95A2B] text-[#D95A2B]' 

@@ -43,10 +43,10 @@ export const AdminProductList: React.FC<AdminProductListProps> = ({
       if (selectedStatus !== 'all' && p.status !== selectedStatus) return false;
       if (search.trim()) {
         const q = search.toLowerCase();
-        const matchName = p.name.toLowerCase().includes(q);
-        const matchSize = p.size.toLowerCase().includes(q);
-        const matchCat = p.category.toLowerCase().includes(q);
-        const matchTags = p.tags?.some(t => t.toLowerCase().includes(q));
+        const matchName = typeof p.name === 'string' && p.name.toLowerCase().includes(q);
+        const matchSize = typeof p.size === 'string' && p.size.toLowerCase().includes(q);
+        const matchCat = typeof p.category === 'string' && p.category.toLowerCase().includes(q);
+        const matchTags = Array.isArray(p.tags) && p.tags.some(t => typeof t === 'string' && t.toLowerCase().includes(q));
         if (!matchName && !matchSize && !matchCat && !matchTags) return false;
       }
       return true;

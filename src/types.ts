@@ -81,6 +81,9 @@ export interface FilterState {
 export interface AdminUser {
   uid: string;
   email: string;
-  role: 'admin' | 'superadmin';
+  role: 'admin' | 'superadmin' | 'inventory_manager' | 'curator';
   displayName?: string;
+  createdAt?: string;
+  createdBy?: string;
+  notes?: string;
 }

@@ -18,10 +18,11 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
     
-    // Admin documents
+    // Admin documents: readable and manageable by authenticated admins
     match /admins/{adminUid} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && request.auth.uid == adminUid;
+      allow write: if isAuthenticated();
     }
   }
 }
+

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
+import { Product } from '../types';
 import { ProductCard } from './ProductCard';
 import { 
   Search, 
@@ -14,7 +15,11 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-export const ProductGrid: React.FC = () => {
+interface ProductGridProps {
+  onQuickView?: (p: Product) => void;
+}
+
+export const ProductGrid: React.FC<ProductGridProps> = ({ onQuickView }) => {
   const { products, filter, setFilter, resetFilters, loading, openWhatsApp } = useStore();
 
   // Filtered & Sorted products list
@@ -46,12 +51,13 @@ export const ProductGrid: React.FC = () => {
       // Search query (matches name, description, category, tags, condition)
       if (filter.searchQuery.trim()) {
         const query = filter.searchQuery.toLowerCase();
-        const matchName = prod.name.toLowerCase().includes(query);
-        const matchDesc = prod.description.toLowerCase().includes(query);
-        const matchCat = prod.category.toLowerCase().includes(query);
-        const matchTags = prod.tags.some(t => t.toLowerCase().includes(query));
-        const matchColour = prod.colour.toLowerCase().includes(query);
-        if (!matchName && !matchDesc && !matchCat && !matchTags && !matchColour) {
+        const matchName = typeof prod.name === 'string' && prod.name.toLowerCase().includes(query);
+        const matchDesc = typeof prod.description === 'string' && prod.description.toLowerCase().includes(query);
+        const matchCat = typeof prod.category === 'string' && prod.category.toLowerCase().includes(query);
+        const matchTags = Array.isArray(prod.tags) && prod.tags.some(t => typeof t === 'string' && t.toLowerCase().includes(query));
+        const matchColour = typeof prod.colour === 'string' && prod.colour.toLowerCase().includes(query);
+        const matchSize = typeof prod.size === 'string' && prod.size.toLowerCase().includes(query);
+        if (!matchName && !matchDesc && !matchCat && !matchTags && !matchColour && !matchSize) {
           return false;
         }
       }
@@ -235,7 +241,7 @@ export const ProductGrid: React.FC = () => {
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} onQuickView={onQuickView} />
             ))}
           </div>
         ) : (

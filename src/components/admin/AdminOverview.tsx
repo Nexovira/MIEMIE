@@ -31,18 +31,18 @@ export const AdminOverview: React.FC<AdminOverviewProps> = ({
 }) => {
   const { products, isFirestoreLive, seedFirestoreData } = useStore();
 
-  const totalProducts = products.length;
-  const availableProducts = products.filter(p => p.status === 'available').length;
-  const reservedProducts = products.filter(p => p.status === 'reserved').length;
-  const soldProducts = products.filter(p => p.status === 'sold').length;
-  const hiddenProducts = products.filter(p => p.status === 'hidden').length;
-  const featuredProducts = products.filter(p => p.featured).length;
+  const totalProducts = products?.length || 0;
+  const availableProducts = (products || []).filter(p => p && p.status === 'available').length;
+  const reservedProducts = (products || []).filter(p => p && p.status === 'reserved').length;
+  const soldProducts = (products || []).filter(p => p && p.status === 'sold').length;
+  const hiddenProducts = (products || []).filter(p => p && p.status === 'hidden').length;
+  const featuredProducts = (products || []).filter(p => p && p.featured).length;
 
-  const totalCatalogValue = products
-    .filter(p => p.status === 'available' || p.status === 'reserved')
-    .reduce((sum, p) => sum + p.price, 0);
+  const totalCatalogValue = (products || [])
+    .filter(p => p && (p.status === 'available' || p.status === 'reserved'))
+    .reduce((sum, p) => sum + (p.price || 0), 0);
 
-  const recentProducts = [...products].slice(0, 5);
+  const recentProducts = [...(products || [])].slice(0, 5);
 
   return (
     <div className="space-y-8">

@@ -6,6 +6,7 @@ import { AdminOverview } from './AdminOverview';
 import { AdminProductList } from './AdminProductList';
 import { AdminProductModal } from './AdminProductModal';
 import { AdminSiteContent } from './AdminSiteContent';
+import { AdminAccounts } from './AdminAccounts';
 import { 
   LayoutDashboard, 
   Package, 
@@ -16,7 +17,9 @@ import {
   Sparkles,
   Database,
   RefreshCw,
-  Plus
+  Plus,
+  Users,
+  Radio
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -27,7 +30,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
   const { currentUser, logout } = useAuth();
   const { seedFirestoreData, isFirestoreLive, loading } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'content'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'content' | 'accounts'>('overview');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [seeding, setSeeding] = useState(false);
@@ -74,11 +77,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
                 M
               </div>
               <div className="text-left">
-                <span className="font-display font-extrabold text-sm sm:text-base tracking-wider block text-white">
-                  THRIFT WITH MIEMIE
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-extrabold text-sm sm:text-base tracking-wider block text-white">
+                    THRIFT WITH MIEMIE
+                  </span>
+                  <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-emerald-500/30">
+                    <Radio className="w-2.5 h-2.5 animate-pulse" />
+                    LIVE SYNC
+                  </span>
+                </div>
                 <span className="text-[10px] text-[#D95A2B] font-bold uppercase tracking-widest block">
-                  ADMIN COCKPIT
+                  ADMIN PORTAL & TEAM ACCESS
                 </span>
               </div>
             </button>
@@ -88,7 +97,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
           <nav className="hidden md:flex items-center gap-1 bg-[#2A2019] p-1.5 rounded-2xl border border-[#3E2F26]">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'overview'
                   ? 'bg-[#1E1611] text-[#D95A2B] shadow-xs'
                   : 'text-stone-300 hover:text-white'
@@ -100,26 +109,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
 
             <button
               onClick={() => setActiveTab('products')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'products'
                   ? 'bg-[#1E1611] text-[#D95A2B] shadow-xs'
                   : 'text-stone-300 hover:text-white'
               }`}
             >
               <Package className="w-4 h-4" />
-              <span>Catalog & Inventory</span>
+              <span>Catalog & Stock</span>
             </button>
 
             <button
               onClick={() => setActiveTab('content')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === 'content'
                   ? 'bg-[#1E1611] text-[#D95A2B] shadow-xs'
                   : 'text-stone-300 hover:text-white'
               }`}
             >
               <Settings className="w-4 h-4" />
-              <span>Site Copy & Policies</span>
+              <span>Photo & Copy</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('accounts')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === 'accounts'
+                  ? 'bg-[#1E1611] text-[#D95A2B] shadow-xs'
+                  : 'text-stone-300 hover:text-white'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Admin Accounts</span>
             </button>
           </nav>
 
@@ -160,10 +181,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
         </div>
 
         {/* Mobile Navigation Tabs */}
-        <div className="md:hidden flex items-center justify-around py-2 border-t border-[#3E2F26]">
+        <div className="md:hidden grid grid-cols-4 gap-1 py-2 border-t border-[#3E2F26]">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`text-xs font-bold py-1.5 px-3 rounded-lg ${
+            className={`text-[11px] font-bold py-1.5 px-2 rounded-lg text-center ${
               activeTab === 'overview' ? 'text-[#D95A2B] bg-[#2A2019]' : 'text-stone-400'
             }`}
           >
@@ -171,7 +192,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
           </button>
           <button
             onClick={() => setActiveTab('products')}
-            className={`text-xs font-bold py-1.5 px-3 rounded-lg ${
+            className={`text-[11px] font-bold py-1.5 px-2 rounded-lg text-center ${
               activeTab === 'products' ? 'text-[#D95A2B] bg-[#2A2019]' : 'text-stone-400'
             }`}
           >
@@ -179,11 +200,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
           </button>
           <button
             onClick={() => setActiveTab('content')}
-            className={`text-xs font-bold py-1.5 px-3 rounded-lg ${
+            className={`text-[11px] font-bold py-1.5 px-2 rounded-lg text-center ${
               activeTab === 'content' ? 'text-[#D95A2B] bg-[#2A2019]' : 'text-stone-400'
             }`}
           >
-            Site Settings
+            Settings
+          </button>
+          <button
+            onClick={() => setActiveTab('accounts')}
+            className={`text-[11px] font-bold py-1.5 px-2 rounded-lg text-center ${
+              activeTab === 'accounts' ? 'text-[#D95A2B] bg-[#2A2019]' : 'text-stone-400'
+            }`}
+          >
+            Admins
           </button>
         </div>
       </header>
@@ -202,7 +231,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
           <AdminOverview
             onAddNewProduct={handleAddNew}
             onEditProduct={handleEdit}
-            onSwitchTab={setActiveTab}
+            onSwitchTab={(tab) => setActiveTab(tab as any)}
             onExitAdmin={onExitAdmin}
           />
         )}
@@ -216,6 +245,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
 
         {activeTab === 'content' && (
           <AdminSiteContent />
+        )}
+
+        {activeTab === 'accounts' && (
+          <AdminAccounts />
         )}
 
       </main>
@@ -232,3 +265,4 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onExitAdmin }) =
     </div>
   );
 };
+

@@ -85,7 +85,7 @@ export const CategoryRail: React.FC = () => {
         {/* Categories Grid (Swipeable / responsive) */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
           {categories.map((cat) => {
-            const count = products.filter(p => p.category === cat.id && p.status !== 'hidden').length;
+            const count = (products || []).filter(p => p && p.category === cat.id && p.status !== 'hidden').length;
 
             return (
               <button

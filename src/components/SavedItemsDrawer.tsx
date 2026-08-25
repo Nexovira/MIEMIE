@@ -1,29 +1,58 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { X, Trash2, MessageCircle, Heart, ArrowRight } from 'lucide-react';
+import { Product } from '../types';
 
-export const SavedItemsDrawer: React.FC = () => {
+interface SavedItemsDrawerProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+  onQuickView?: (product: Product) => void;
+}
+
+export const SavedItemsDrawer: React.FC<SavedItemsDrawerProps> = ({
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+  onQuickView: propOnQuickView
+}) => {
   const { 
     savedProductIds, 
     products, 
     toggleSaveProduct, 
-    isSavedDrawerOpen, 
+    isSavedDrawerOpen: storeIsOpen, 
     setIsSavedDrawerOpen, 
     setQuickViewProduct,
     openWhatsApp 
   } = useStore();
 
-  if (!isSavedDrawerOpen) return null;
+  const isActuallyOpen = propIsOpen !== undefined ? propIsOpen : storeIsOpen;
 
-  const savedProducts = products.filter(p => savedProductIds.includes(p.id));
-  const totalPrice = savedProducts.reduce((sum, p) => sum + p.price, 0);
+  if (!isActuallyOpen) return null;
+
+  const handleClose = () => {
+    if (propOnClose) {
+      propOnClose();
+    }
+    setIsSavedDrawerOpen(false);
+  };
+
+  const handleItemClick = (p: Product) => {
+    if (propOnQuickView) {
+      propOnQuickView(p);
+    } else {
+      setQuickViewProduct(p);
+    }
+    handleClose();
+  };
+
+  const savedProducts = (products || []).filter(p => p && (savedProductIds || []).includes(p.id));
+  const totalPrice = savedProducts.reduce((sum, p) => sum + (p.price || 0), 0);
 
   const handleClaimAllOnWhatsApp = () => {
     if (savedProducts.length === 0) return;
     const itemsList = savedProducts.map(p => `• ${p.name} (Size: ${p.size}) - ₦${p.price.toLocaleString()}`).join('\n');
     const message = `Hi Miemie! I have saved these ${savedProducts.length} items from your website:\n\n${itemsList}\n\nTotal: ₦${totalPrice.toLocaleString()}\n\nAre they still available so I can make payment and claim them?`;
     openWhatsApp(undefined, message);
-    setIsSavedDrawerOpen(false);
+    handleClose();
   };
 
   return (
@@ -41,7 +70,7 @@ export const SavedItemsDrawer: React.FC = () => {
           </div>
 
           <button
-            onClick={() => setIsSavedDrawerOpen(false)}
+            onClick={handleClose}
             className="p-2 rounded-full hover:bg-[#EAE5DC] text-[#1E1611] transition-colors"
             aria-label="Close saved drawer"
           >
@@ -60,7 +89,8 @@ export const SavedItemsDrawer: React.FC = () => {
                 <img
                   src={product.coverImage}
                   alt={product.name}
-                  className="w-16 h-20 rounded-xl object-cover bg-stone-200 shrink-0"
+                  className="w-16 h-20 rounded-xl object-cover bg-stone-200 shrink-0 cursor-pointer"
+                  onClick={() => handleItemClick(product)}
                 />
 
                 <div className="flex-1 min-w-0">
@@ -74,10 +104,7 @@ export const SavedItemsDrawer: React.FC = () => {
                   </div>
 
                   <h3 
-                    onClick={() => {
-                      setQuickViewProduct(product);
-                      setIsSavedDrawerOpen(false);
-                    }}
+                    onClick={() => handleItemClick(product)}
                     className="font-display text-xs sm:text-sm font-bold text-[#1E1611] truncate cursor-pointer hover:text-[#D95A2B]"
                   >
                     {product.name}
